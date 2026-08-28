@@ -120,7 +120,7 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
       className={`rounded-r-lg border border-slate-200 dark:border-slate-800 border-l-4 p-3.5 ${borderColors[color]} transition-all`}
     >
       <blockquote className="text-xs italic text-slate-800 dark:text-slate-200 leading-relaxed font-serif">
-        "{quote}"
+        &ldquo;{quote}&rdquo;
       </blockquote>
       {comment && (
         <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 font-sans">

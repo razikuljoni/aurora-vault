@@ -234,7 +234,7 @@ export const BookmarksView: React.FC<BookmarksViewProps> = ({
                 {/* User Notes */}
                 {bm.notes && (
                   <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400 italic">
-                    "{bm.notes}"
+                    &ldquo;{bm.notes}&rdquo;
                   </div>
                 )}
               </div>

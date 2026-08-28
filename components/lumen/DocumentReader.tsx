@@ -221,7 +221,7 @@ export const DocumentReader: React.FC<DocumentReaderProps> = ({
             </div>
 
             <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs italic font-serif text-slate-300 max-h-28 overflow-y-auto">
-              "{selectedText}"
+              &ldquo;{selectedText}&rdquo;
             </div>
 
             {/* Color Tagging */}

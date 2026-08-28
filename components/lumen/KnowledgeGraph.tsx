@@ -52,7 +52,6 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
     CONCEPT: true,
   });
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
-  const [simulatedNodes, setSimulatedNodes] = useState<SimulatedNode[]>([]);
 
   // Node Type colors
   const typeConfig: Record<NodeType, { color: string; fill: string; stroke: string; label: string; icon: any }> = {
@@ -86,8 +85,8 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
     );
   }, [graphData.edges, filteredNodeIds]);
 
-  // Force-directed simulation placement initialization
-  useEffect(() => {
+  // Force-directed simulation placement computation
+  const simulatedNodes: SimulatedNode[] = useMemo(() => {
     const width = 800;
     const height = 550;
     const initialNodes: SimulatedNode[] = filteredNodes.map((n, i) => {
@@ -145,7 +144,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
       }
     }
 
-    setSimulatedNodes(initialNodes);
+    return initialNodes;
   }, [filteredNodes, filteredEdges]);
 
   // Connected node IDs for neighborhood highlight

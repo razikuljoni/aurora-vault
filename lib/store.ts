@@ -1755,6 +1755,46 @@ class KnowledgeStore {
     return member;
   }
 
+  public removeMember(memberId: string): boolean {
+    const idx = this.members.findIndex((m) => m.id === memberId);
+    if (idx !== -1) {
+      const mem = this.members[idx];
+      this.members.splice(idx, 1);
+      this.workspace.membersCount = this.members.length;
+      this.recordAudit('PERMISSION_REVOKED', `Removed member ${mem.email} from workspace`, 'SUCCESS');
+      return true;
+    }
+    return false;
+  }
+
+  public deleteBookmark(id: string): boolean {
+    const idx = this.bookmarks.findIndex((b) => b.id === id);
+    if (idx !== -1) {
+      const bm = this.bookmarks[idx];
+      this.bookmarks.splice(idx, 1);
+      this.recordActivity('DELETED', 'BOOKMARK', id, bm.title, 'Removed bookmark.');
+      return true;
+    }
+    return false;
+  }
+
+  public deleteCodeSnippet(id: string): boolean {
+    const idx = this.codeSnippets.findIndex((c) => c.id === id);
+    if (idx !== -1) {
+      const snip = this.codeSnippets[idx];
+      this.codeSnippets.splice(idx, 1);
+      this.recordActivity('DELETED', 'CODE', id, snip.title, 'Removed code snippet.');
+      return true;
+    }
+    return false;
+  }
+
+  public updateWorkspace(updates: Partial<Workspace>): Workspace {
+    Object.assign(this.workspace, updates);
+    this.recordAudit('WORKSPACE_SETTINGS_UPDATED', `Updated workspace settings for ${this.workspace.name}`, 'SUCCESS');
+    return this.workspace;
+  }
+
   public saveSearch(name: string, query: string, filters: any): SavedSearch {
     const search: SavedSearch = {
       id: `search_${Date.now()}`,

@@ -138,7 +138,7 @@ export const ContextRail: React.FC<ContextRailProps> = ({
                     <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400 italic line-clamp-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded">
-                    "{bl.contextSnippet}"
+                    &ldquo;{bl.contextSnippet}&rdquo;
                   </p>
                 </div>
               ))

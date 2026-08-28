@@ -2,17 +2,17 @@ import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 
 export const metadata: Metadata = {
-  title: 'My Google AI Studio App',
-  description: 'An application built with Google AI Studio.',
+  title: 'Aurora Vault - Knowledge & Intelligence Workspace',
+  description: 'Advanced Knowledge, Research & Digital Intelligence Workspace. Capture, connect, and explore your notes, documents, bookmarks, and knowledge graphs.',
   openGraph: {
-    title: 'My Google AI Studio App',
-    description: 'An application built with Google AI Studio.',
+    title: 'Aurora Vault - Knowledge & Intelligence Workspace',
+    description: 'Advanced Knowledge, Research & Digital Intelligence Workspace. Capture, connect, and explore your notes, documents, bookmarks, and knowledge graphs.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'My Google AI Studio App',
-    description: 'An application built with Google AI Studio.',
+    title: 'Aurora Vault - Knowledge & Intelligence Workspace',
+    description: 'Advanced Knowledge, Research & Digital Intelligence Workspace. Capture, connect, and explore your notes, documents, bookmarks, and knowledge graphs.',
   },
 };
 

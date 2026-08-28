@@ -171,11 +171,8 @@ export default function AuroraVaultPage() {
   };
 
   const handleDeleteBookmark = (id: string) => {
-    const idx = bookmarks.findIndex((b) => b.id === id);
-    if (idx !== -1) {
-      bookmarks.splice(idx, 1);
-      syncStore();
-    }
+    knowledgeStore.deleteBookmark(id);
+    syncStore();
   };
 
   // Code Snippet Actions
@@ -185,11 +182,8 @@ export default function AuroraVaultPage() {
   };
 
   const handleDeleteSnippet = (id: string) => {
-    const idx = codeSnippets.findIndex((c) => c.id === id);
-    if (idx !== -1) {
-      codeSnippets.splice(idx, 1);
-      syncStore();
-    }
+    knowledgeStore.deleteCodeSnippet(id);
+    syncStore();
   };
 
   // Collection Actions
@@ -221,7 +215,7 @@ export default function AuroraVaultPage() {
 
   // Workspace Settings Actions
   const handleUpdateWorkspace = (updates: Partial<Workspace>) => {
-    Object.assign(currentWorkspace, updates);
+    knowledgeStore.updateWorkspace(updates);
     syncStore();
   };
 
@@ -236,12 +230,8 @@ export default function AuroraVaultPage() {
   };
 
   const handleRemoveMember = (memberId: string) => {
-    const idx = members.findIndex((m) => m.id === memberId);
-    if (idx !== -1) {
-      members.splice(idx, 1);
-      currentWorkspace.membersCount = members.length;
-      syncStore();
-    }
+    knowledgeStore.removeMember(memberId);
+    syncStore();
   };
 
   const handleExportVault = () => {

@@ -47,16 +47,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync internal state when active note prop changes
-  useEffect(() => {
-    setTitle(note.title);
-    setContent(note.content);
-    setTags(note.tags || []);
-    setCollectionId(note.collectionId || '');
-    setSaveStatus('SAVED');
-    setLastSavedAt(new Date(note.updatedAt));
-  }, [note.id]);
-
   // Debounced Autosave (800ms)
   const triggerAutosave = (newTitle: string, newContent: string, newTags: string[], newColId: string) => {
     setSaveStatus('SAVING');

@@ -286,7 +286,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs font-mono text-slate-400">
           <span>Found {searchResults.length} matching artifacts</span>
-          {query && <span>Query: "{query}"</span>}
+          {query && <span>Query: &ldquo;{query}&rdquo;</span>}
         </div>
 
         {searchResults.length === 0 ? (
