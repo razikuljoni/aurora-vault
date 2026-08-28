@@ -9,6 +9,8 @@ import {
   Send,
   X,
   Check,
+  Mic,
+  MicOff,
 } from 'lucide-react';
 import { InboxItemType } from '@/lib/types';
 
@@ -30,8 +32,56 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  
+  // Speech Recognition reference
+  const recognitionRef = React.useRef<any>(null);
 
   if (!isOpen) return null;
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support the Web Speech API. Please try Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+      if (finalTranscript) {
+        setContent((prev) => (prev ? prev + ' ' + finalTranscript : finalTranscript));
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +200,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
           )}
 
           {/* Content / Snippet */}
-          <div>
+          <div className="relative">
             <textarea
               placeholder={
                 type === 'CODE'
@@ -164,6 +214,20 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
               rows={4}
               className="w-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-1 focus:ring-sky-500 font-mono resize-none leading-relaxed"
             />
+            {type !== 'CODE' && type !== 'URL' && (
+              <button
+                type="button"
+                onClick={toggleRecording}
+                className={`absolute bottom-3 right-3 p-1.5 rounded-full shadow-xs transition-colors cursor-pointer ${
+                  isRecording
+                    ? 'bg-rose-500 text-white animate-pulse'
+                    : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-sky-500 border border-slate-200 dark:border-slate-700'
+                }`}
+                title={isRecording ? 'Stop recording' : 'Start voice dictation'}
+              >
+                {isRecording ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+              </button>
+            )}
           </div>
 
           {/* Tags */}

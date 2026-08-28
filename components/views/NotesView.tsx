@@ -62,6 +62,7 @@ export const NotesView: React.FC<NotesViewProps> = ({
   const [selectedCol, setSelectedCol] = useState<string | null>(null);
   const [showContextRail, setShowContextRail] = useState(true);
   const [isTemplateMenuOpen, setIsTemplateMenuOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const templateMenuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on click outside
@@ -251,6 +252,9 @@ export const NotesView: React.FC<NotesViewProps> = ({
             filteredNotes.map((note) => {
               const isActive = activeNote?.id === note.id;
               const blCount = getBacklinks(note.id).length;
+              const wordCount = note.content.split(/\s+/).filter(Boolean).length;
+              const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+              
               return (
                 <div
                   key={note.id}
@@ -281,6 +285,7 @@ export const NotesView: React.FC<NotesViewProps> = ({
                       {note.collectionName || 'General'}
                     </span>
                     <div className="flex items-center gap-1.5">
+                      <span>{readingTime}m read</span>
                       {blCount > 0 && (
                         <span className="flex items-center gap-0.5 text-sky-600 dark:text-sky-400">
                           <Link2 className="h-2.5 w-2.5" />
@@ -298,7 +303,7 @@ export const NotesView: React.FC<NotesViewProps> = ({
       </div>
 
       {/* Column 2: Note Editor / Focus Reader (Center) */}
-      <div className="flex-1 p-4 overflow-hidden flex flex-col">
+      <div className={`flex flex-col flex-1 overflow-hidden p-4 ${isFullscreen ? 'fixed inset-0 z-50 bg-slate-100 dark:bg-slate-950' : ''}`}>
         {activeNote ? (
           <NoteEditor
             key={activeNote.id}
@@ -306,6 +311,8 @@ export const NotesView: React.FC<NotesViewProps> = ({
             notes={notes}
             documents={documents}
             collections={collections}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
             onSave={(updates) => onSaveNote(activeNote.id, updates)}
             onDelete={onDeleteNote}
             onTogglePin={onTogglePin}

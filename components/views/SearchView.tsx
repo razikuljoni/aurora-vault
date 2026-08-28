@@ -27,6 +27,38 @@ interface SearchViewProps {
   className?: string;
 }
 
+// Semantic Similarity Helpers (TF Cosine)
+const getTermFrequency = (text: string): Record<string, number> => {
+  const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+  const tf: Record<string, number> = {};
+  words.forEach(w => {
+    tf[w] = (tf[w] || 0) + 1;
+  });
+  return tf;
+};
+
+const cosineSimilarity = (query: string, document: string): number => {
+  const qTf = getTermFrequency(query);
+  const dTf = getTermFrequency(document);
+  
+  const uniqueWords = new Set([...Object.keys(qTf), ...Object.keys(dTf)]);
+  
+  let dotProduct = 0;
+  let qMag = 0;
+  let dMag = 0;
+  
+  uniqueWords.forEach(w => {
+    const qVal = qTf[w] || 0;
+    const dVal = dTf[w] || 0;
+    dotProduct += qVal * dVal;
+    qMag += qVal * qVal;
+    dMag += dVal * dVal;
+  });
+  
+  if (qMag === 0 || dMag === 0) return 0;
+  return dotProduct / (Math.sqrt(qMag) * Math.sqrt(dMag));
+};
+
 export const SearchView: React.FC<SearchViewProps> = ({
   notes,
   documents,
@@ -66,20 +98,25 @@ export const SearchView: React.FC<SearchViewProps> = ({
       badge: string;
       badgeVariant: 'primary' | 'emerald' | 'amber' | 'purple' | 'rose' | 'muted';
       view: string;
+      score: number;
     }> = [];
+
+    const getScore = (text: string) => {
+      if (!q) return 1;
+      // Bonus if exact match
+      const exactBonus = text.toLowerCase().includes(q) ? 0.5 : 0;
+      return cosineSimilarity(q, text) + exactBonus;
+    };
 
     // Search Notes
     if (selectedType === 'ALL' || selectedType === 'NOTE') {
       notes.forEach((n) => {
-        const matchesQuery =
-          !q ||
-          n.title.toLowerCase().includes(q) ||
-          n.content.toLowerCase().includes(q) ||
-          n.tags.some((t) => t.toLowerCase().includes(q));
+        const fullText = `${n.title} ${n.content} ${n.tags.join(' ')}`;
+        const score = getScore(fullText);
         const matchesCol = selectedCollection === 'ALL' || n.collectionId === selectedCollection;
         const matchesTag = !selectedTag || n.tags.includes(selectedTag);
 
-        if (matchesQuery && matchesCol && matchesTag) {
+        if ((!q || score > 0) && matchesCol && matchesTag) {
           results.push({
             id: n.id,
             title: n.title,
@@ -92,6 +129,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
             badge: `v${n.versionCount} • ${n.wordCount} words`,
             badgeVariant: 'primary',
             view: 'notes',
+            score,
           });
         }
       });
@@ -100,16 +138,12 @@ export const SearchView: React.FC<SearchViewProps> = ({
     // Search Documents
     if (selectedType === 'ALL' || selectedType === 'DOCUMENT') {
       documents.forEach((d) => {
-        const matchesQuery =
-          !q ||
-          d.title.toLowerCase().includes(q) ||
-          d.extractedText.toLowerCase().includes(q) ||
-          (d.summary && d.summary.toLowerCase().includes(q)) ||
-          d.tags.some((t) => t.toLowerCase().includes(q));
+        const fullText = `${d.title} ${d.extractedText} ${d.summary || ''} ${d.tags.join(' ')}`;
+        const score = getScore(fullText);
         const matchesCol = selectedCollection === 'ALL' || d.collectionId === selectedCollection;
         const matchesTag = !selectedTag || d.tags.includes(selectedTag);
 
-        if (matchesQuery && matchesCol && matchesTag) {
+        if ((!q || score > 0) && matchesCol && matchesTag) {
           results.push({
             id: d.id,
             title: d.title,
@@ -121,6 +155,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
             badge: `${d.pageCount} pages`,
             badgeVariant: 'rose',
             view: 'documents',
+            score,
           });
         }
       });
@@ -129,16 +164,12 @@ export const SearchView: React.FC<SearchViewProps> = ({
     // Search Bookmarks
     if (selectedType === 'ALL' || selectedType === 'BOOKMARK') {
       bookmarks.forEach((b) => {
-        const matchesQuery =
-          !q ||
-          b.title.toLowerCase().includes(q) ||
-          b.description.toLowerCase().includes(q) ||
-          b.domain.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q));
+        const fullText = `${b.title} ${b.description} ${b.domain} ${b.tags.join(' ')}`;
+        const score = getScore(fullText);
         const matchesCol = selectedCollection === 'ALL' || b.collectionId === selectedCollection;
         const matchesTag = !selectedTag || b.tags.includes(selectedTag);
 
-        if (matchesQuery && matchesCol && matchesTag) {
+        if ((!q || score > 0) && matchesCol && matchesTag) {
           results.push({
             id: b.id,
             title: b.title,
@@ -151,6 +182,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
             badge: b.domain,
             badgeVariant: 'emerald',
             view: 'bookmarks',
+            score,
           });
         }
       });
@@ -159,16 +191,12 @@ export const SearchView: React.FC<SearchViewProps> = ({
     // Search Code Snippets
     if (selectedType === 'ALL' || selectedType === 'CODE') {
       codeSnippets.forEach((c) => {
-        const matchesQuery =
-          !q ||
-          c.title.toLowerCase().includes(q) ||
-          c.description.toLowerCase().includes(q) ||
-          c.code.toLowerCase().includes(q) ||
-          c.tags.some((t) => t.toLowerCase().includes(q));
+        const fullText = `${c.title} ${c.description || ''} ${c.code} ${c.tags.join(' ')}`;
+        const score = getScore(fullText);
         const matchesCol = selectedCollection === 'ALL' || c.collectionId === selectedCollection;
         const matchesTag = !selectedTag || c.tags.includes(selectedTag);
 
-        if (matchesQuery && matchesCol && matchesTag) {
+        if ((!q || score > 0) && matchesCol && matchesTag) {
           results.push({
             id: c.id,
             title: c.title,
@@ -180,12 +208,13 @@ export const SearchView: React.FC<SearchViewProps> = ({
             badge: c.language,
             badgeVariant: 'amber',
             view: 'code',
+            score,
           });
         }
       });
     }
 
-    return results;
+    return results.sort((a, b) => b.score - a.score);
   }, [query, selectedType, selectedCollection, selectedTag, notes, documents, bookmarks, codeSnippets]);
 
   return (

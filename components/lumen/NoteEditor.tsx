@@ -19,6 +19,8 @@ import {
   Search,
   Sparkles,
   CornerDownLeft,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import { Note, Collection, NoteVersion, DocumentItem } from '@/lib/types';
 
@@ -31,6 +33,8 @@ interface NoteEditorProps {
   onDelete?: (id: string) => void;
   onTogglePin?: (id: string) => void;
   onOpenBacklink?: (title: string) => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
   className?: string;
 }
 
@@ -43,6 +47,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   onDelete,
   onTogglePin,
   onOpenBacklink,
+  isFullscreen = false,
+  onToggleFullscreen,
   className = '',
 }) => {
   const [title, setTitle] = useState(note.title);
@@ -82,7 +88,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       });
       setSaveStatus('SAVED');
       setLastSavedAt(new Date());
-    }, 800);
+    }, 1000);
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,6 +328,20 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               <Eye className="h-3 w-3" /> Preview
             </button>
           </div>
+
+          {onToggleFullscreen && (
+            <button
+              onClick={onToggleFullscreen}
+              className={`p-1.5 rounded-md border transition-colors cursor-pointer ${
+                isFullscreen
+                  ? 'bg-sky-500/10 text-sky-600 border-sky-500/20'
+                  : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+            </button>
+          )}
 
           {onTogglePin && (
             <button
