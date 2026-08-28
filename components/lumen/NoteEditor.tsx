@@ -26,6 +26,7 @@ import {
   Maximize,
   Minimize,
   Table,
+  Download,
 } from 'lucide-react';
 import { Note, Collection, NoteVersion, DocumentItem } from '@/lib/types';
 
@@ -73,11 +74,53 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const pdfExportRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Filter notes for auto-suggest
   const matchingNotes = notes
     .filter((n) => n.id !== note.id && n.title.toLowerCase().includes(suggestQuery.toLowerCase()))
     .slice(0, 6);
+
+  const handleDownloadPDF = async () => {
+    if (!pdfExportRef.current) return;
+    setIsExporting(true);
+
+    try {
+      // Dynamically import client-only libraries to prevent SSR build errors
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const element = pdfExportRef.current;
+      element.style.display = 'block'; // Make visible for html2canvas
+
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        logging: false,
+        background: '#ffffff', // Force white background for PDF
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${title || 'Untitled Note'}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+    } finally {
+      if (pdfExportRef.current) {
+        pdfExportRef.current.style.display = 'none';
+      }
+      setIsExporting(false);
+    }
+  };
 
   // Debounced Autosave (800ms)
   const triggerAutosave = (newTitle: string, newContent: string, newTags: string[], newColId: string) => {
@@ -382,6 +425,19 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             </button>
           )}
 
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isExporting}
+            className={`p-1.5 rounded-md border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer ${
+              isExporting
+                ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+            }`}
+            title="Download as PDF"
+          >
+            <Download className={`h-3.5 w-3.5 ${isExporting ? 'animate-pulse' : ''}`} />
+          </button>
+
           {onDelete && (
             <button
               onClick={() => onDelete(note.id)}
@@ -575,6 +631,37 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
         </div>
         <div className="text-slate-400">
           Tip: Type <code className="text-sky-500 bg-sky-50 dark:bg-sky-950/50 px-1 py-0.5 rounded">[[</code> to auto-suggest & connect notes
+        </div>
+      </div>
+
+      {/* Hidden Div for PDF Export */}
+      <div 
+        ref={pdfExportRef}
+        style={{
+          display: 'none',
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          width: '800px',
+          background: '#ffffff',
+          padding: '40px',
+          color: '#000000',
+        }}
+      >
+        <h1 className="text-3xl font-bold font-serif mb-4 text-black" style={{ color: '#000000' }}>
+          {title || 'Untitled Note'}
+        </h1>
+        {tags.length > 0 && (
+          <div className="flex gap-2 mb-6">
+            {tags.map((t) => (
+              <span key={t} className="text-gray-500 text-sm">
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="prose max-w-none text-black prose-code:before:hidden prose-code:after:hidden">
+          {renderMarkdownPreview(content)}
         </div>
       </div>
     </div>
