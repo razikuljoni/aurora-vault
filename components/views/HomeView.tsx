@@ -16,9 +16,10 @@ import {
   Clock,
   ChevronRight,
 } from 'lucide-react';
-import { Note, DocumentItem, Bookmark, Collection, DeterministicIntelligenceInsights, InboxItem } from '@/lib/types';
+import { Note, DocumentItem, Bookmark, Collection, DeterministicIntelligenceInsights, InboxItem, ActivityItem } from '@/lib/types';
 import { LumenCard } from '../lumen/LumenCard';
 import { InsightStrip } from '../lumen/SourceBadge';
+import { ContributionHeatmap } from '../lumen/ContributionHeatmap';
 
 interface HomeViewProps {
   insights: DeterministicIntelligenceInsights;
@@ -27,6 +28,7 @@ interface HomeViewProps {
   recentBookmarks: Bookmark[];
   collections: Collection[];
   inboxItems: InboxItem[];
+  activities: ActivityItem[];
   onNavigate: (view: string, itemId?: string) => void;
   onOpenQuickCapture: () => void;
   onSelectNote: (noteId: string) => void;
@@ -40,6 +42,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   recentBookmarks,
   collections,
   inboxItems,
+  activities,
   onNavigate,
   onOpenQuickCapture,
   onSelectNote,
@@ -105,6 +108,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Visual Contribution Heatmap */}
+      <ContributionHeatmap
+        activities={activities}
+        notes={recentNotes}
+        documents={recentDocs}
+        weeksCount={18}
+        onSelectDate={(dateStr) => {
+          // Date selected
+        }}
+      />
 
       {/* Grid Layout: Continue Research + Capture Inbox */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -271,6 +271,19 @@ export interface SavedSearch {
   createdAt: string;
 }
 
+export interface NoteTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  iconName?: string;
+  category?: string;
+  badge?: string;
+  defaultTitle: string;
+  defaultTags: string[];
+  content: string;
+}
+
 export interface DeterministicIntelligenceInsights {
   staleNotes: { id: string; title: string; daysInactive: number; tags: string[] }[];
   orphanNodes: { id: string; title: string; type: NodeType }[];

@@ -13,6 +13,7 @@ import {
   InboxItem,
   Role,
   DocumentHighlight,
+  NoteTemplate,
 } from '@/lib/types';
 import { Header } from '@/components/lumen/Header';
 import { Sidebar } from '@/components/lumen/Sidebar';
@@ -107,11 +108,28 @@ export default function AuroraVaultPage() {
   };
 
   // Note Actions
-  const handleCreateNote = () => {
+  const handleCreateNote = (template?: Partial<Note> | NoteTemplate) => {
+    let title = 'Untitled Note';
+    let content = '# Untitled Note\n\nStart authoring with [[wikilinks]] and markdown syntax...';
+    let tags: string[] = ['research'];
+
+    if (template) {
+      if ('defaultTitle' in template) {
+        title = template.defaultTitle;
+        content = template.content;
+        tags = template.defaultTags;
+      } else {
+        const notePartial = template as Partial<Note>;
+        if (notePartial.title) title = notePartial.title;
+        if (notePartial.content) content = notePartial.content;
+        if (notePartial.tags) tags = notePartial.tags;
+      }
+    }
+
     const newNote = knowledgeStore.createNote({
-      title: 'Untitled Note',
-      content: '# Untitled Note\n\nStart authoring with [[wikilinks]] and markdown syntax...',
-      tags: ['research'],
+      title,
+      content,
+      tags,
       collectionId: selectedCollectionId || undefined,
     });
     syncStore();
@@ -307,6 +325,7 @@ export default function AuroraVaultPage() {
               recentBookmarks={bookmarks.slice(0, 4)}
               collections={collections}
               inboxItems={inboxItems.filter((i) => i.status === 'PENDING')}
+              activities={activity}
               onNavigate={handleNavigate}
               onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
               onSelectNote={(noteId) => {
@@ -333,6 +352,7 @@ export default function AuroraVaultPage() {
           {currentView === 'notes' && (
             <NotesView
               notes={notes}
+              documents={documents}
               collections={collections}
               activeNoteId={selectedNoteId}
               onSelectNote={setSelectedNoteId}
