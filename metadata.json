@@ -1,0 +1,6 @@
+{
+  "name": "Aurora Vault",
+  "description": "Advanced Knowledge, Research & Digital Intelligence Workspace. Capture, connect, and explore your notes, documents, bookmarks, and knowledge graphs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
