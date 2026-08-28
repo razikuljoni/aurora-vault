@@ -25,6 +25,7 @@ import {
   CornerDownLeft,
   Maximize,
   Minimize,
+  Table,
 } from 'lucide-react';
 import { Note, Collection, NoteVersion, DocumentItem } from '@/lib/types';
 
@@ -149,6 +150,27 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
         const newPos = before.length + selectedTitle.length + 5; // length of `[[${selectedTitle}]] `
         textarea.setSelectionRange(newPos, newPos);
       }
+    }, 20);
+  };
+
+  const insertMarkdownTable = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const cursor = textarea.selectionStart;
+    const before = content.slice(0, cursor);
+    const after = content.slice(cursor);
+    
+    const tableTemplate = `\n| Header 1 | Header 2 | Header 3 |\n| :--- | :--- | :--- |\n| Row 1, Col 1 | Row 1, Col 2 | Row 1, Col 3 |\n| Row 2, Col 1 | Row 2, Col 2 | Row 2, Col 3 |\n\n`;
+    
+    const newContent = `${before}${tableTemplate}${after}`;
+    setContent(newContent);
+    triggerAutosave(title, newContent, tags, collectionId);
+    
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = cursor + tableTemplate.length;
+      textarea.setSelectionRange(newPos, newPos);
     }, 20);
   };
 
@@ -412,14 +434,26 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 
         {/* Content Area (Write vs Preview) */}
         {!isPreview ? (
-          <div className="relative">
+          <div className="relative flex flex-col flex-1 min-h-[420px]">
+            {/* Formatting Toolbar */}
+            <div className="flex items-center gap-1 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={insertMarkdownTable}
+                className="p-1.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Insert Table"
+              >
+                <Table className="h-4 w-4" />
+              </button>
+            </div>
+            
             <textarea
               ref={textareaRef}
               value={content}
               onChange={handleContentChange}
               onKeyDown={handleTextareaKeyDown}
               placeholder="Write your thoughts in Markdown. Type [[ to link existing notes..."
-              className="w-full min-h-[420px] bg-transparent text-slate-800 dark:text-slate-200 font-sans text-sm leading-relaxed resize-none focus:outline-hidden"
+              className="w-full flex-1 bg-transparent text-slate-800 dark:text-slate-200 font-sans text-sm leading-relaxed resize-none focus:outline-hidden"
             />
 
             {/* Wikilink Auto-suggest Dropdown Popover */}
