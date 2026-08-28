@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
   Save,
   Clock,
@@ -207,62 +211,61 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const wordCount = content.split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  // Render markdown with clickable [[Backlinks]]
+  // Render markdown with clickable [[Backlinks]] and syntax highlighting
   const renderMarkdownPreview = (text: string) => {
-    const parts = text.split(/(\[\[.*?\]\])/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('[[') && part.endsWith(']]')) {
-        const linkTitle = part.slice(2, -2);
-        return (
-          <button
-            key={index}
-            onClick={() => onOpenBacklink?.(linkTitle)}
-            className="inline-flex items-center gap-1 font-mono text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800 hover:underline cursor-pointer mx-0.5 text-sm"
-          >
-            <Link2 className="h-3 w-3" />
-            <span>{linkTitle}</span>
-          </button>
-        );
-      }
+    // Pre-process wikilinks to markdown links
+    const processedText = text.replace(/\[\[(.*?)\]\]/g, '[$1](wikilink:$1)');
 
-      if (part.startsWith('# ')) {
-        return (
-          <h1 key={index} className="text-2xl font-bold text-slate-900 dark:text-slate-100 my-4 font-serif">
-            {part.replace(/^# /, '')}
-          </h1>
-        );
-      }
-
-      if (part.startsWith('## ')) {
-        return (
-          <h2 key={index} className="text-xl font-bold text-slate-900 dark:text-slate-100 my-3 font-serif">
-            {part.replace(/^## /, '')}
-          </h2>
-        );
-      }
-
-      if (part.startsWith('### ')) {
-        return (
-          <h3 key={index} className="text-lg font-semibold text-slate-900 dark:text-slate-100 my-2 font-serif">
-            {part.replace(/^### /, '')}
-          </h3>
-        );
-      }
-
-      if (part.startsWith('```')) {
-        return (
-          <pre key={index} className="p-3 my-3 rounded-lg bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800">
-            {part.replace(/```[a-z]*\n?/g, '')}
-          </pre>
-        );
-      }
-
-      return (
-        <p key={index} className="my-2 leading-relaxed text-slate-800 dark:text-slate-200 text-sm whitespace-pre-wrap">
-          {part}
-        </p>
-      );
-    });
+    return (
+      <div className="markdown-body">
+        <Markdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ href, children, ...props }) => {
+              if (href?.startsWith('wikilink:')) {
+                const linkTitle = decodeURIComponent(href.replace('wikilink:', ''));
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onOpenBacklink?.(linkTitle)}
+                    className="inline-flex items-center gap-1 font-mono text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800 hover:underline cursor-pointer mx-0.5 text-sm"
+                  >
+                    <Link2 className="h-3 w-3" />
+                    <span>{linkTitle}</span>
+                  </button>
+                );
+              }
+              return (
+                <a href={href} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline" {...props}>
+                  {children}
+                </a>
+              );
+            },
+            code(props) {
+              const { children, className, node, ...rest } = props;
+              const match = /language-(\w+)/.exec(className || '');
+              return match ? (
+                <SyntaxHighlighter
+                  {...(rest as any)}
+                  PreTag="div"
+                  language={match[1]}
+                  style={vscDarkPlus as any}
+                  className="rounded-lg text-xs"
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code {...rest} className={`${className || ''} bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm font-mono`}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        >
+          {processedText}
+        </Markdown>
+      </div>
+    );
   };
 
   return (
@@ -521,7 +524,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             )}
           </div>
         ) : (
-          <div className="min-h-[420px] max-w-[68ch] mx-auto prose dark:prose-invert">
+          <div className="min-h-[420px] max-w-[68ch] mx-auto prose dark:prose-invert prose-code:before:hidden prose-code:after:hidden">
             {renderMarkdownPreview(content)}
           </div>
         )}
