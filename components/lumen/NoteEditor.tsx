@@ -97,7 +97,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       const canvas = await html2canvas(element, {
         useCORS: true,
         logging: false,
-        background: '#ffffff', // Force white background for PDF
+        backgroundColor: '#ffffff', // Force white background for PDF
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
@@ -643,7 +643,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           top: '-9999px',
           left: '-9999px',
           width: '800px',
-          background: '#ffffff',
+          backgroundColor: '#ffffff',
           padding: '40px',
           color: '#000000',
         }}

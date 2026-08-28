@@ -68,9 +68,9 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
   };
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-slate-100 dark:bg-slate-950">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-3.5rem)] overflow-hidden bg-slate-100 dark:bg-slate-950">
       {/* Column 1: Document List (Width: 320px) */}
-      <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-col shrink-0">
+      <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-col shrink-0 h-1/3 md:h-full">
         <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
             <Files className="h-4 w-4 text-rose-500" />

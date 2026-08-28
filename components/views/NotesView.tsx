@@ -132,9 +132,9 @@ export const NotesView: React.FC<NotesViewProps> = ({
   const activeCollection = activeNote ? collections.find((c) => c.id === activeNote.collectionId) : null;
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-slate-100 dark:bg-slate-950">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-3.5rem)] overflow-hidden bg-slate-100 dark:bg-slate-950">
       {/* Column 1: Notes List Panel (Width: 320px) */}
-      <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md flex flex-col shrink-0">
+      <div className={`w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shrink-0 flex flex-col ${isFullscreen ? 'hidden' : 'flex h-[40vh] md:h-full'}`}>
         {/* Search & Actions Header */}
         <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2.5">
           <div className="flex items-center justify-between">

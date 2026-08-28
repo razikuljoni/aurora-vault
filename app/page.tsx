@@ -56,6 +56,7 @@ export default function AuroraVaultPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(notes[0]?.id || null);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(documents[0]?.id || null);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Modals
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -100,6 +101,7 @@ export default function AuroraVaultPage() {
   // Navigation handler
   const handleNavigate = (view: string, itemId?: string) => {
     setCurrentView(view);
+    setIsMobileMenuOpen(false);
     if (itemId) {
       if (view === 'notes') setSelectedNoteId(itemId);
       if (view === 'documents') setSelectedDocId(itemId);
@@ -298,10 +300,11 @@ export default function AuroraVaultPage() {
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
         onNavigate={handleNavigate}
+        onToggleSidebar={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
       {/* Main Workspace Frame: Sidebar + Active View Stage */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Navigation Sidebar */}
         <Sidebar
           currentView={currentView}
@@ -313,10 +316,21 @@ export default function AuroraVaultPage() {
           }}
           inboxCount={pendingInboxCount}
           workspace={currentWorkspace}
+          className={`absolute md:relative z-30 h-full transform transition-transform duration-200 ease-in-out ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
         />
 
+        {/* Mobile Sidebar Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-20 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Dynamic Main Viewport */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
+        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 w-full min-w-0">
           {currentView === 'home' && (
             <HomeView
               insights={insights}

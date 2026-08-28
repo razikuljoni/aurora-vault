@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Lock,
   User as UserIcon,
+  Menu,
 } from 'lucide-react';
 import { Workspace, User } from '@/lib/types';
 
@@ -22,6 +23,7 @@ interface HeaderProps {
   onOpenCommandPalette: () => void;
   onOpenQuickCapture: () => void;
   onNavigate: (view: string) => void;
+  onToggleSidebar?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,11 +34,20 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCommandPalette,
   onOpenQuickCapture,
   onNavigate,
+  onToggleSidebar,
 }) => {
   return (
     <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between z-20 shrink-0">
       {/* Left: Workspace Branding & Switcher */}
       <div className="flex items-center gap-3">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-1.5 -ml-2 rounded-lg text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-linear-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-sm font-bold text-xs tracking-wider">
             AV
